@@ -1,7 +1,7 @@
 const CACHE_NAME = 'cthulhu-tool-v1';
 const urlsToCache = [
-  './cthulhu-scenario-tool.html',
-  './manifest.json'
+  '/',
+  '/manifest.json'
 ];
 
 self.addEventListener('install', event => {

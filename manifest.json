@@ -2,7 +2,7 @@
   "name": "クトゥルフシナリオ作成ツール",
   "short_name": "CoCツール",
   "description": "クトゥルフ神話TRPGのシナリオ作成支援ツール",
-  "start_url": "./cthulhu-scenario-tool.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0f0f1e",
   "theme_color": "#1a1a2e",
