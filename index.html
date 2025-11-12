@@ -151,13 +151,13 @@
         }
 
         .action-buttons {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px;
             margin-top: 16px;
         }
 
         .action-btn {
-            flex: 1;
             padding: 14px;
             background: #4a9eff;
             color: white;
@@ -277,6 +277,14 @@
         <div class="tab" data-tab="notation">記法</div>
     </div>
 
+    <textarea id="text-area" placeholder="ここにシナリオを書いていきます..."></textarea>
+
+    <div class="action-buttons">
+        <button class="action-btn" onclick="copyText()">📋 コピー</button>
+        <button class="action-btn secondary" onclick="clearText()">🗑️ クリア</button>
+        <button class="action-btn secondary" onclick="resetCount()">🔄 カウントリセット</button>
+    </div>
+
     <div class="tab-content active" id="skills-tab">
         <div class="legend">
             <div class="legend-item">
@@ -315,13 +323,6 @@
             <button class="notation-btn" onclick="showInsertModal()">挿入</button>
             <button class="notation-btn" onclick="insertNotation('［', '］')">数字</button>
         </div>
-    </div>
-
-    <textarea id="text-area" placeholder="ここにシナリオを書いていきます..."></textarea>
-
-    <div class="action-buttons">
-        <button class="action-btn" onclick="copyText()">📋 コピー</button>
-        <button class="action-btn secondary" onclick="clearText()">🗑️ クリア</button>
     </div>
 
     <div class="modal" id="insert-modal">
@@ -524,6 +525,15 @@
         function clearText() {
             if (confirm('本当にクリアしますか？')) {
                 document.getElementById('text-area').value = '';
+            }
+        }
+
+        // カウントリセット
+        function resetCount() {
+            if (confirm('技能の使用回数をリセットしますか？')) {
+                usageCount = {};
+                saveData();
+                renderSkills();
             }
         }
 

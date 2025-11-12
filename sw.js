@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cthulhu-tool-v1';
+const CACHE_NAME = 'cthulhu-tool-v2';
 const urlsToCache = [
   '/',
   '/manifest.json'
