@@ -105,16 +105,6 @@
             color: #e0e0e0;
         }
 
-        .skill-btn .count {
-            position: absolute;
-            top: 2px;
-            right: 4px;
-            font-size: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 2px 5px;
-            border-radius: 10px;
-        }
-
         .notation-btn {
             padding: 12px;
             background: #1a3a5a;
@@ -152,7 +142,7 @@
 
         .action-buttons {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 8px;
             margin-top: 16px;
         }
@@ -282,7 +272,6 @@
     <div class="action-buttons">
         <button class="action-btn" onclick="copyText()">📋 コピー</button>
         <button class="action-btn secondary" onclick="clearText()">🗑️ クリア</button>
-        <button class="action-btn secondary" onclick="resetCount()">🔄 カウントリセット</button>
     </div>
 
     <div class="tab-content active" id="skills-tab">
@@ -384,15 +373,13 @@
             if (saved) {
                 const data = JSON.parse(saved);
                 skills.custom = data.customSkills || [];
-                usageCount = data.usageCount || {};
             }
         }
 
         // データ保存
         function saveData() {
             localStorage.setItem('cthulhuToolData', JSON.stringify({
-                customSkills: skills.custom,
-                usageCount: usageCount
+                customSkills: skills.custom
             }));
         }
 
@@ -408,20 +395,10 @@
                 ...skills.custom.map(s => ({ name: s, type: 'custom' }))
             ];
 
-            // 使用回数でソート
-            allSkills.sort((a, b) => (usageCount[b.name] || 0) - (usageCount[a.name] || 0));
-
             allSkills.forEach(skill => {
                 const btn = document.createElement('button');
                 btn.className = `skill-btn ${skill.type}`;
                 btn.textContent = skill.name;
-                
-                if (usageCount[skill.name]) {
-                    const countSpan = document.createElement('span');
-                    countSpan.className = 'count';
-                    countSpan.textContent = usageCount[skill.name];
-                    btn.appendChild(countSpan);
-                }
 
                 btn.onclick = () => insertSkill(skill.name);
                 grid.appendChild(btn);
@@ -440,11 +417,6 @@
             textarea.value = before + `〈${skillName}〉` + after;
             textarea.focus();
             textarea.selectionStart = textarea.selectionEnd = start + skillName.length + 2;
-
-            // カウント増加
-            usageCount[skillName] = (usageCount[skillName] || 0) + 1;
-            saveData();
-            renderSkills();
         }
 
         // 記法挿入
@@ -525,15 +497,6 @@
         function clearText() {
             if (confirm('本当にクリアしますか？')) {
                 document.getElementById('text-area').value = '';
-            }
-        }
-
-        // カウントリセット
-        function resetCount() {
-            if (confirm('技能の使用回数をリセットしますか？')) {
-                usageCount = {};
-                saveData();
-                renderSkills();
             }
         }
 
