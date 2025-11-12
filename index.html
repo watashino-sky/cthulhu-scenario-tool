@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>クトゥルフシナリオ作成ツール</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
+            background: #0f0f1e;
+            color: #e0e0e0;
+            padding: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #4a9eff;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: #1a1a2e;
+            border: 2px solid #2a2a3e;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .tab.active {
+            background: #2a4a6e;
+            border-color: #4a9eff;
+            color: #4a9eff;
+        }
+
+        .tab-content {
+            display: none;
+            margin-bottom: 16px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .skill-btn {
+            padding: 12px 8px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .skill-btn:active {
+            transform: scale(0.95);
+        }
+
+        .skill-btn.both {
+            background: #2a2a3e;
+            color: #e0e0e0;
+        }
+
+        .skill-btn.v6only {
+            background: #2d5f2d;
+            color: #e0e0e0;
+        }
+
+        .skill-btn.v7only {
+            background: #5d2d7d;
+            color: #e0e0e0;
+        }
+
+        .skill-btn.custom {
+            background: #7d2d2d;
+            color: #e0e0e0;
+        }
+
+        .skill-btn .count {
+            position: absolute;
+            top: 2px;
+            right: 4px;
+            font-size: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 5px;
+            border-radius: 10px;
+        }
+
+        .notation-btn {
+            padding: 12px;
+            background: #1a3a5a;
+            color: #e0e0e0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .notation-btn:active {
+            transform: scale(0.95);
+            background: #2a4a6a;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 16px;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            border: 2px solid #2a2a3e;
+            border-radius: 8px;
+            font-size: 15px;
+            line-height: 1.8;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 14px;
+            background: #4a9eff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+            background: #3a8eef;
+        }
+
+        .action-btn.secondary {
+            background: #2a4a6e;
+        }
+
+        .add-skill-form {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            background: #1a1a2e;
+            border-radius: 8px;
+            border: 2px solid #2a2a3e;
+        }
+
+        .add-skill-form.active {
+            display: block;
+        }
+
+        .add-skill-form input {
+            width: 100%;
+            padding: 10px;
+            background: #0f0f1e;
+            color: #e0e0e0;
+            border: 2px solid #2a2a3e;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .add-skill-form input:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 90%;
+            width: 400px;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            background: #0f0f1e;
+            color: #e0e0e0;
+            border: 2px solid #2a2a3e;
+            border-radius: 6px;
+            font-size: 15px;
+            margin: 16px 0;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📖 クトゥルフシナリオ作成ツール</h1>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="skills">技能</div>
+        <div class="tab" data-tab="notation">記法</div>
+    </div>
+
+    <div class="tab-content active" id="skills-tab">
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #2a2a3e;"></div>
+                <span>6版・7版共通</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #2d5f2d;"></div>
+                <span>6版のみ</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #5d2d7d;"></div>
+                <span>7版のみ</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #7d2d2d;"></div>
+                <span>カスタム</span>
+            </div>
+        </div>
+
+        <div class="button-grid" id="skills-grid"></div>
+
+        <button class="action-btn secondary" onclick="toggleAddSkillForm()">+ カスタム技能を追加</button>
+        
+        <div class="add-skill-form" id="add-skill-form">
+            <input type="text" id="new-skill-name" placeholder="技能名を入力">
+            <button class="action-btn" onclick="addCustomSkill()">追加</button>
+        </div>
+    </div>
+
+    <div class="tab-content" id="notation-tab">
+        <div class="button-grid">
+            <button class="notation-btn" onclick="insertNotation('〝', '〟')">描写</button>
+            <button class="notation-btn" onclick="insertNotation('（', '）')">KP情報</button>
+            <button class="notation-btn" onclick="insertNotation('【', '】')">キーワード</button>
+            <button class="notation-btn" onclick="showInsertModal()">挿入</button>
+            <button class="notation-btn" onclick="insertNotation('［', '］')">数字</button>
+        </div>
+    </div>
+
+    <textarea id="text-area" placeholder="ここにシナリオを書いていきます..."></textarea>
+
+    <div class="action-buttons">
+        <button class="action-btn" onclick="copyText()">📋 コピー</button>
+        <button class="action-btn secondary" onclick="clearText()">🗑️ クリア</button>
+    </div>
+
+    <div class="modal" id="insert-modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 8px; color: #4a9eff;">挿入する文字を入力</h3>
+            <input type="text" id="insert-text" placeholder="例: KPC">
+            <div class="modal-buttons">
+                <button class="action-btn" onclick="insertCustomText()">挿入</button>
+                <button class="action-btn secondary" onclick="closeInsertModal()">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 技能データ
+        const skills = {
+            both: [
+                // 戦闘系
+                '回避', 'キック', '組みつき', '投擲', '拳銃', 'サブマシンガン', 'ショットガン', 'マシンガン', 'ライフル',
+                // 探索系
+                '応急手当', '鍵開け', '聞き耳', '精神分析', '追跡', '登攀', '図書館', '目星',
+                // 行動系
+                '運転', '機械修理', '重機械操作', '乗馬', '水泳', '製作', '操縦', '跳躍', '電気修理', 'ナビゲート', '変装',
+                // 交渉系
+                '説得', '信用', '母国語',
+                // 知識系
+                '医学', 'オカルト', 'クトゥルフ神話', '芸術', '経理', '考古学', 'コンピューター', '心理学', '人類学', '化学', '生物学', '地質学', '電子工学', '天文学', '物理学', '法律', '薬学', '歴史'
+            ],
+            v6only: [
+                // 戦闘系
+                'こぶし(パンチ)', '頭突き', 'マーシャルアーツ',
+                // 探索系
+                '隠す', '隠れる', '忍び歩き', '写真術',
+                // 交渉系
+                '言いくるめ', '値切り',
+                // 知識系
+                '博物学',
+                // 特性
+                'アイデア', '幸運', '知識'
+            ],
+            v7only: [
+                // 戦闘系
+                '斧', '格闘', '絞殺ひも', 'チェーンソー', '刀剣', 'フレイル', 'むち', '槍', '火炎放射器', '重火器', '弓', 'ライフル/ショットガン',
+                // 探索系
+                '手さばき', '隠密', '鑑定',
+                // 交渉系
+                '言いくるめ', '威圧', '魅惑', '言語',
+                // 知識系
+                '暗号学', '気象学', '工学', '植物学', '数学', '動物学', '法医学', '自然', 'サバイバル'
+            ],
+            custom: []
+        };
+
+        let usageCount = {};
+
+        // ローカルストレージから復元
+        function loadData() {
+            const saved = localStorage.getItem('cthulhuToolData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                skills.custom = data.customSkills || [];
+                usageCount = data.usageCount || {};
+            }
+        }
+
+        // データ保存
+        function saveData() {
+            localStorage.setItem('cthulhuToolData', JSON.stringify({
+                customSkills: skills.custom,
+                usageCount: usageCount
+            }));
+        }
+
+        // 技能ボタン生成
+        function renderSkills() {
+            const grid = document.getElementById('skills-grid');
+            grid.innerHTML = '';
+
+            const allSkills = [
+                ...skills.both.map(s => ({ name: s, type: 'both' })),
+                ...skills.v6only.map(s => ({ name: s, type: 'v6only' })),
+                ...skills.v7only.map(s => ({ name: s, type: 'v7only' })),
+                ...skills.custom.map(s => ({ name: s, type: 'custom' }))
+            ];
+
+            // 使用回数でソート
+            allSkills.sort((a, b) => (usageCount[b.name] || 0) - (usageCount[a.name] || 0));
+
+            allSkills.forEach(skill => {
+                const btn = document.createElement('button');
+                btn.className = `skill-btn ${skill.type}`;
+                btn.textContent = skill.name;
+                
+                if (usageCount[skill.name]) {
+                    const countSpan = document.createElement('span');
+                    countSpan.className = 'count';
+                    countSpan.textContent = usageCount[skill.name];
+                    btn.appendChild(countSpan);
+                }
+
+                btn.onclick = () => insertSkill(skill.name);
+                grid.appendChild(btn);
+            });
+        }
+
+        // 技能挿入
+        function insertSkill(skillName) {
+            const textarea = document.getElementById('text-area');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const before = text.substring(0, start);
+            const after = text.substring(end);
+            
+            textarea.value = before + `〈${skillName}〉` + after;
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = start + skillName.length + 2;
+
+            // カウント増加
+            usageCount[skillName] = (usageCount[skillName] || 0) + 1;
+            saveData();
+            renderSkills();
+        }
+
+        // 記法挿入
+        function insertNotation(left, right) {
+            const textarea = document.getElementById('text-area');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const before = text.substring(0, start);
+            const after = text.substring(end);
+            
+            textarea.value = before + left + right + after;
+            textarea.focus();
+            textarea.selectionStart = textarea.selectionEnd = start + 1;
+        }
+
+        // カスタム挿入モーダル
+        function showInsertModal() {
+            document.getElementById('insert-modal').classList.add('active');
+            document.getElementById('insert-text').focus();
+        }
+
+        function closeInsertModal() {
+            document.getElementById('insert-modal').classList.remove('active');
+            document.getElementById('insert-text').value = '';
+        }
+
+        function insertCustomText() {
+            const customText = document.getElementById('insert-text').value;
+            if (customText) {
+                insertNotation('{', '}');
+                const textarea = document.getElementById('text-area');
+                const pos = textarea.selectionStart;
+                const text = textarea.value;
+                textarea.value = text.substring(0, pos) + customText + text.substring(pos);
+                textarea.selectionStart = textarea.selectionEnd = pos + customText.length;
+            }
+            closeInsertModal();
+        }
+
+        // カスタム技能追加
+        function toggleAddSkillForm() {
+            const form = document.getElementById('add-skill-form');
+            form.classList.toggle('active');
+            if (form.classList.contains('active')) {
+                document.getElementById('new-skill-name').focus();
+            }
+        }
+
+        function addCustomSkill() {
+            const input = document.getElementById('new-skill-name');
+            const skillName = input.value.trim();
+            
+            if (skillName && !skills.custom.includes(skillName)) {
+                skills.custom.push(skillName);
+                saveData();
+                renderSkills();
+                input.value = '';
+                toggleAddSkillForm();
+            }
+        }
+
+        // テキストコピー
+        function copyText() {
+            const textarea = document.getElementById('text-area');
+            textarea.select();
+            document.execCommand('copy');
+            
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '✓ コピーしました！';
+            setTimeout(() => {
+                btn.textContent = originalText;
+            }, 2000);
+        }
+
+        // テキストクリア
+        function clearText() {
+            if (confirm('本当にクリアしますか？')) {
+                document.getElementById('text-area').value = '';
+            }
+        }
+
+        // タブ切り替え
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + '-tab').classList.add('active');
+            });
+        });
+
+        // Enterキーでモーダル確定
+        document.getElementById('insert-text').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') insertCustomText();
+        });
+
+        // 初期化
+        loadData();
+        renderSkills();
+
+        // PWA対応
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+</body>
+</html>
